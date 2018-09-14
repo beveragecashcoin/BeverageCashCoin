@@ -34,7 +34,8 @@ library SafeMath
 // ERC Token Standard #20 Interface
 // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md
 // ----------------------------------------------------------------------------
-contract ERC20Interface {
+contract ERC20Interface
+{
     function totalSupply() public constant returns (uint);
     function balanceOf(address tokenOwner) public constant returns (uint balance);
     function allowance(address tokenOwner, address spender) public constant returns (uint remaining);
@@ -69,15 +70,16 @@ contract BCCT is ERC20Interface
         symbol = "BCCT";
         name = "Beverage Cash Coin";
         decimals = 18;
-        _totalSupply = 150425700 * 10**uint(decimals); // 150,235,700.000000000000000000
+        _totalSupply = 150425700 * 10**uint(decimals); // 150,235,700,000,000,000,000,000,000 (wei)
         balances[owner] = _totalSupply;
         emit Transfer(address(0), owner, _totalSupply);
     }
-    
+
     // ------------------------------------------------------------------------
     // Allows execution of function only for owner of smart-contract
     // ------------------------------------------------------------------------
-    modifier onlyOwner {
+    modifier onlyOwner
+    {
         require(msg.sender == owner);
         _;
     }
@@ -87,9 +89,16 @@ contract BCCT is ERC20Interface
     // - Owner's account must have sufficient balance to transfer
     // - 0 value transfers are allowed
     // ------------------------------------------------------------------------
-    function transferFromOwner(address to, uint tokens) public onlyOwner returns (bool success)
+    function transferQueue(address[] to, uint[] tokens) public onlyOwner returns (bool success)
     {
-        return transfer(to, tokens);
+		require(to.length == tokens.length);
+		
+		for (uint64 i = 0; i < to.length; ++i)
+		{
+			transfer(to[i], tokens[i]);
+		}
+		
+		return true;
     }
     
     // ------------------------------------------------------------------------
