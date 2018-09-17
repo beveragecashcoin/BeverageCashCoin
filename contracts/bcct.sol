@@ -89,6 +89,10 @@ contract BCCT is ERC20Interface
         _;
     }
     
+    // ------------------------------------------------------------------------
+    // Adds address of destination and amount of tokens to the queue
+    // the queue can later be executed by transferQueue
+    // ------------------------------------------------------------------------
     function addToTransferQueue(address to, uint tokens) public onlyOwner returns (bool success)
     {
 		queryAddresses.push(to);
@@ -97,7 +101,7 @@ contract BCCT is ERC20Interface
 	}
     
     // ------------------------------------------------------------------------
-    // Transfer the balance from smart contract owner's account to `to` account
+    // Transfer the balance from smart contract owner's account to `to` accounts
     // - Owner's account must have sufficient balance to transfer
     // - 0 value transfers are allowed
     // ------------------------------------------------------------------------
