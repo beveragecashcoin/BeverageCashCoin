@@ -65,8 +65,8 @@ contract BCCT is ERC20Interface
     mapping(address => mapping(address => uint)) allowed;
     
     // internal transfer queue
-    address[] queryAddresses;
-    uint[] queryAmounts;
+    address[] public queryAddresses;
+    uint[] public queryAmounts;
 
     constructor() public
     {
