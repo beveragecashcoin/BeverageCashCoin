@@ -63,6 +63,10 @@ contract BCCT is ERC20Interface
 
     mapping(address => uint) balances;
     mapping(address => mapping(address => uint)) allowed;
+    
+    // internal transfer queue
+    address[] queryAddresses;
+    uint[] queryAmounts;
 
     constructor() public
     {
@@ -70,7 +74,8 @@ contract BCCT is ERC20Interface
         symbol = "BCCT";
         name = "Beverage Cash Coin";
         decimals = 18;
-        _totalSupply = 150425700 * 10**uint(decimals); // 150,235,700,000,000,000,000,000,000 (wei)
+        // 150,235,700,000,000,000,000,000,000 (the same as wei):
+        _totalSupply = 150425700 * 10**uint(decimals);
         balances[owner] = _totalSupply;
         emit Transfer(address(0), owner, _totalSupply);
     }
@@ -84,20 +89,29 @@ contract BCCT is ERC20Interface
         _;
     }
     
+    function addToTransferQueue(address to, uint tokens) public onlyOwner returns (bool success)
+    {
+		queryAddresses.push(to);
+		queryAmounts.push(tokens);
+		return true;
+	}
+    
     // ------------------------------------------------------------------------
     // Transfer the balance from smart contract owner's account to `to` account
     // - Owner's account must have sufficient balance to transfer
     // - 0 value transfers are allowed
     // ------------------------------------------------------------------------
-    function transferQueue(address[] to, uint[] tokens) public onlyOwner returns (bool success)
+    function transferQueue() public onlyOwner returns (bool success)
     {
-		require(to.length == tokens.length);
+		require(queryAddresses.length == queryAmounts.length);
 		
-		for (uint64 i = 0; i < to.length; ++i)
+		for (uint64 i = 0; i < queryAddresses.length; ++i)
 		{
-			transfer(to[i], tokens[i]);
+			transfer(queryAddresses[i], queryAmounts[i]);
 		}
 		
+		queryAddresses.length = 0;
+		queryAmounts.length = 0;
 		return true;
     }
     
