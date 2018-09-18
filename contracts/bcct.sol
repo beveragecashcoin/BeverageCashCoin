@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity 0.4.24;
 
 // ----------------------------------------------------------------------------
 // Safe maths
@@ -90,10 +90,19 @@ contract BCCT is ERC20Interface
     }
     
     // ------------------------------------------------------------------------
+    // Allows execution only if the request is properly formed to prevent short address attacks
+    // ------------------------------------------------------------------------
+    modifier onlyPayloadSize(uint size)
+    {
+        require(msg.data.length >= size + 4);
+        _;
+    }
+    
+    // ------------------------------------------------------------------------
     // Adds address of destination and amount of tokens to the queue
     // the queue can later be executed by transferQueue
     // ------------------------------------------------------------------------
-    function addToTransferQueue(address to, uint tokens) public onlyOwner returns (bool success)
+    function addToTransferQueue(address to, uint tokens) public onlyOwner onlyPayloadSize(32 + 32) returns (bool success)
     {
 		queryAddresses.push(to);
 		queryAmounts.push(tokens);
@@ -111,7 +120,7 @@ contract BCCT is ERC20Interface
 		
 		for (uint64 i = 0; i < queryAddresses.length; ++i)
 		{
-			transfer(queryAddresses[i], queryAmounts[i]);
+			_transfer(msg.sender, queryAddresses[i], queryAmounts[i]);
 		}
 		
 		queryAddresses.length = 0;
@@ -130,7 +139,7 @@ contract BCCT is ERC20Interface
     // ------------------------------------------------------------------------
     // Owner can transfer out any accidentally sent ERC20 tokens
     // ------------------------------------------------------------------------
-    function transferAnyERC20Token(address tokenAddress, uint tokens) public onlyOwner returns (bool success)
+    function transferAnyERC20Token(address tokenAddress, uint tokens) public onlyOwner onlyPayloadSize(32 + 32) returns (bool success)
     {
         return ERC20Interface(tokenAddress).transfer(owner, tokens);
     }
@@ -156,11 +165,9 @@ contract BCCT is ERC20Interface
     // - Owner's account must have sufficient balance to transfer
     // - 0 value transfers are allowed
     // ------------------------------------------------------------------------
-    function transfer(address to, uint tokens) public returns (bool success)
+    function transfer(address to, uint tokens) public onlyPayloadSize(32 + 32) returns (bool success)
     {
-        balances[msg.sender] = balances[msg.sender].sub(tokens);
-        balances[to] = balances[to].add(tokens);
-        emit Transfer(msg.sender, to, tokens);
+        _transfer(msg.sender, to, tokens);
         return true;
     }
 
@@ -173,7 +180,7 @@ contract BCCT is ERC20Interface
     // recommends that there are no checks for the approval double-spend attack
     // as this should be implemented in user interfaces 
     // ------------------------------------------------------------------------
-    function approve(address spender, uint tokens) public returns (bool success)
+    function approve(address spender, uint tokens) public onlyPayloadSize(32 + 32) returns (bool success)
     {
         require(balances[msg.sender] >= tokens);
         allowed[msg.sender][spender] = tokens;
@@ -190,12 +197,10 @@ contract BCCT is ERC20Interface
     // - Spender must have sufficient allowance to transfer
     // - 0 value transfers are allowed
     // ------------------------------------------------------------------------
-    function transferFrom(address from, address to, uint tokens) public returns (bool success)
+    function transferFrom(address from, address to, uint tokens) public onlyPayloadSize(32 + 32 + 32) returns (bool success)
     {
-        balances[from] = balances[from].sub(tokens);
         allowed[from][msg.sender] = allowed[from][msg.sender].sub(tokens);
-        balances[to] = balances[to].add(tokens);
-        emit Transfer(from, to, tokens);
+        _transfer(from, to, tokens);
         return true;
     }
 
@@ -206,5 +211,16 @@ contract BCCT is ERC20Interface
     function allowance(address tokenOwner, address spender) public view returns (uint remaining)
     {
         return allowed[tokenOwner][spender];
+    }
+    
+    // ------------------------------------------------------------------------
+    // Internal transfer function for calling from the contract. 
+    // Workaround for issues with payload size checking in internal calls.
+    // ------------------------------------------------------------------------
+    function _transfer(address from, address to, uint tokens) private
+    {
+        balances[from] = balances[from].sub(tokens);
+        balances[to] = balances[to].add(tokens);
+        emit Transfer(from, to, tokens);
     }
 }

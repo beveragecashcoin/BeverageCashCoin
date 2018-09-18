@@ -26,8 +26,18 @@ async function assertNoRevert (promise) {
   }
 }
 
+function prepareCallData(signature, params) {
+    var data = signature;
+    params.forEach(function(element) {
+            data = data.concat(element.slice("0x".length));
+        });
+    return data;
+}
+
 contract("BCCT", async function([ownerAccount, targetAccount, anotherAccount]){
     const voidAddress = '0x0000000000000000000000000000000000000000';
+    const shortAddress = '0x00000000000000000000000000000000000000214a5b67a8ef9327a8d731';
+    const shortAddressAmount = '0x0000000000000000000000000000000000000000000000000000000000002710';
     const totalTokens = web3.toBigNumber(web3.toWei(150425700, "ether"));
     
     beforeEach(async function () {
@@ -97,6 +107,12 @@ contract("BCCT", async function([ownerAccount, targetAccount, anotherAccount]){
             });
         });
         
+        describe("when the target address is short", function(){
+            it("should revert", async function(){
+                await assertRevert(this.instance.sendTransaction({from: ownerAccount, data: prepareCallData("0xa9059cbb", [shortAddress, shortAddressAmount])})); //66 bytes instead of 68
+            });
+        });
+        
         describe('when the receiver is the void address', function () {
             const toAccount = voidAddress;
 
@@ -155,6 +171,12 @@ contract("BCCT", async function([ownerAccount, targetAccount, anotherAccount]){
                 {
                     await assertRevert(this.instance.approve(spender, amount, {from: tokenOwner}));
                 });
+            });
+        });
+        
+        describe("when the target address is short", function(){
+            it("should revert", async function(){
+                await assertRevert(this.instance.sendTransaction({from: ownerAccount, data: prepareCallData("0x095ea7b3", [shortAddress, shortAddressAmount])})); //66 bytes instead of 68
             });
         });
         
@@ -249,6 +271,12 @@ contract("BCCT", async function([ownerAccount, targetAccount, anotherAccount]){
                 await assertNoRevert(this.instance.transferFrom(tokenOwner, toAccount, amount, { from: spender }));
             });
         });
+        
+        describe("when the target address is short", function(){
+            it("should revert", async function(){
+                await assertRevert(this.instance.sendTransaction({from: ownerAccount, data: prepareCallData("0x23b872dd", [ownerAccount, shortAddress, shortAddressAmount])})); //92 bytes instead of 96
+            });
+        });
     });
     
     describe("addToTransferQueue", function(){
@@ -263,6 +291,12 @@ contract("BCCT", async function([ownerAccount, targetAccount, anotherAccount]){
             it("should insert the amount of tokens into the queryAmounts array", async function(){
                 await this.instance.addToTransferQueue(targetAccount, amountToInsert, {from: ownerAccount});
                 (await this.instance.queryAmounts(0)).should.be.bignumber.equal(amountToInsert);
+            });
+        });
+        
+        describe("when the target address is short", function(){
+            it("should revert", async function(){
+                await assertRevert(this.instance.sendTransaction({from: ownerAccount, data: prepareCallData("0x1f15b69f", [shortAddress, shortAddressAmount])})); //66 bytes instead of 68
             });
         });
         
