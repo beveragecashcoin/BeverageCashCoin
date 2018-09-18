@@ -100,8 +100,8 @@ contract("BCCT", async function([ownerAccount, targetAccount, anotherAccount]){
         describe('when the receiver is the void address', function () {
             const toAccount = voidAddress;
 
-            it('should revert', async function () {
-                await assertRevert(this.instance.transfer(toAccount, 100, { from: fromAccount }));
+            it('should not revert', async function () {
+                await assertNoRevert(this.instance.transfer(toAccount, 100, { from: fromAccount }));
             });
         });
         
@@ -162,9 +162,9 @@ contract("BCCT", async function([ownerAccount, targetAccount, anotherAccount]){
             const spender = voidAddress;
             const amount = 100;
             
-            it("should revert", async function()
+            it("should not revert", async function()
             {
-                await assertRevert(this.instance.approve(spender, amount, {from: tokenOwner}));
+                await assertNoRevert(this.instance.approve(spender, amount, {from: tokenOwner}));
             });
         });
     });
@@ -245,8 +245,8 @@ contract("BCCT", async function([ownerAccount, targetAccount, anotherAccount]){
                 await this.instance.approve(spender, amount, { from: tokenOwner });
             });
 
-            it('should revert', async function () {
-                await assertRevert(this.instance.transferFrom(tokenOwner, toAccount, amount, { from: spender }));
+            it('should not revert', async function () {
+                await assertNoRevert(this.instance.transferFrom(tokenOwner, toAccount, amount, { from: spender }));
             });
         });
     });

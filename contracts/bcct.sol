@@ -175,6 +175,7 @@ contract BCCT is ERC20Interface
     // ------------------------------------------------------------------------
     function approve(address spender, uint tokens) public returns (bool success)
     {
+        require(balances[msg.sender] >= tokens);
         allowed[msg.sender][spender] = tokens;
         emit Approval(msg.sender, spender, tokens);
         return true;
