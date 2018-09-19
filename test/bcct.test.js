@@ -1,4 +1,4 @@
-var BeverageCoin = artifacts.require("./bcct.sol");
+var BeverageCoin = artifacts.require("BCCT");
 
 const BigNumber = web3.BigNumber;
 
