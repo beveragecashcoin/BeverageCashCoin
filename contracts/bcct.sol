@@ -65,10 +65,6 @@ contract BCCT is ERC20Interface
     mapping(address => uint) balances;
     mapping(address => mapping(address => uint)) allowed;
     
-    // internal transfer queue
-    address[] public queryAddresses;
-    uint[] public queryAmounts;
-
     constructor() public
     {
         owner = msg.sender;
@@ -95,32 +91,20 @@ contract BCCT is ERC20Interface
     }
     
     // ------------------------------------------------------------------------
-    // Adds address of destination and amount of tokens to the queue
-    // the queue can later be executed by transferQueue
-    // ------------------------------------------------------------------------
-    function addToTransferQueue(address to, uint tokens) public onlyOwner onlyPayloadSize(32 + 32) returns (bool success)
-    {
-        queryAddresses.push(to);
-        queryAmounts.push(tokens);
-        return true;
-    }
-    
-    // ------------------------------------------------------------------------
-    // Transfer the balance from smart contract owner's account to `to` accounts
+    // Perform several transfers from smart contract owner's account to `to` accounts.
+    // Useful during ICO to save gas on base transaction costs.
     // - Owner's account must have sufficient balance to transfer
     // - 0 value transfers are allowed
     // ------------------------------------------------------------------------
-    function transferQueue() public onlyOwner returns (bool success)
+    function transferQueue(address[] to, uint[] amount) public onlyOwner returns (bool success)
     {
-        require(queryAddresses.length == queryAmounts.length);
+        require(to.length == amount.length);
         
-        for (uint64 i = 0; i < queryAddresses.length; ++i)
+        for (uint64 i = 0; i < to.length; ++i)
         {
-            _transfer(msg.sender, queryAddresses[i], queryAmounts[i]);
+            _transfer(msg.sender, to[i], amount[i]);
         }
         
-        queryAddresses.length = 0;
-        queryAmounts.length = 0;
         return true;
     }
 
