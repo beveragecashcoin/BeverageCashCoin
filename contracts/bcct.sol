@@ -52,14 +52,15 @@ contract ERC20Interface
 // fixed supply
 // ----------------------------------------------------------------------------
 contract BCCT is ERC20Interface
-{	
+{
     using SafeMath for uint;
     
     address public owner;
-    string public symbol;
-    string public name;
-    uint8 public decimals;
-    uint _totalSupply;
+    string public symbol = "BCCT";
+    string public name = "Beverage Cash Coin";
+    uint8 public decimals = 18;
+    // 150,235,700,000,000,000,000,000,000 (the same as wei):
+    uint private _totalSupply = 150425700 * 10**uint(decimals);
 
     mapping(address => uint) balances;
     mapping(address => mapping(address => uint)) allowed;
@@ -70,12 +71,7 @@ contract BCCT is ERC20Interface
 
     constructor() public
     {
-		owner = msg.sender;
-        symbol = "BCCT";
-        name = "Beverage Cash Coin";
-        decimals = 18;
-        // 150,235,700,000,000,000,000,000,000 (the same as wei):
-        _totalSupply = 150425700 * 10**uint(decimals);
+        owner = msg.sender;
         balances[owner] = _totalSupply;
         emit Transfer(address(0), owner, _totalSupply);
     }
@@ -94,7 +90,7 @@ contract BCCT is ERC20Interface
     // ------------------------------------------------------------------------
     modifier onlyPayloadSize(uint size)
     {
-        require(msg.data.length >= size + 4);
+        require(msg.data.length >= size + 4); // add 4 bytes for function signature
         _;
     }
     
@@ -104,10 +100,10 @@ contract BCCT is ERC20Interface
     // ------------------------------------------------------------------------
     function addToTransferQueue(address to, uint tokens) public onlyOwner onlyPayloadSize(32 + 32) returns (bool success)
     {
-		queryAddresses.push(to);
-		queryAmounts.push(tokens);
-		return true;
-	}
+        queryAddresses.push(to);
+        queryAmounts.push(tokens);
+        return true;
+    }
     
     // ------------------------------------------------------------------------
     // Transfer the balance from smart contract owner's account to `to` accounts
@@ -116,24 +112,16 @@ contract BCCT is ERC20Interface
     // ------------------------------------------------------------------------
     function transferQueue() public onlyOwner returns (bool success)
     {
-		require(queryAddresses.length == queryAmounts.length);
-		
-		for (uint64 i = 0; i < queryAddresses.length; ++i)
-		{
-			_transfer(msg.sender, queryAddresses[i], queryAmounts[i]);
-		}
-		
-		queryAddresses.length = 0;
-		queryAmounts.length = 0;
-		return true;
-    }
-    
-    // ------------------------------------------------------------------------
-    // Don't accept ETH
-    // ------------------------------------------------------------------------
-    function () public payable
-    {
-        revert();
+        require(queryAddresses.length == queryAmounts.length);
+        
+        for (uint64 i = 0; i < queryAddresses.length; ++i)
+        {
+            _transfer(msg.sender, queryAddresses[i], queryAmounts[i]);
+        }
+        
+        queryAddresses.length = 0;
+        queryAmounts.length = 0;
+        return true;
     }
 
     // ------------------------------------------------------------------------
@@ -145,7 +133,7 @@ contract BCCT is ERC20Interface
     }
 
     // ------------------------------------------------------------------------
-    // ERC-20: Total supply in accounts (excluding tokenOwner)
+    // ERC-20: Total supply in accounts
     // ------------------------------------------------------------------------
     function totalSupply() public view returns (uint)
     {
