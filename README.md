@@ -20,7 +20,7 @@ To deploy the smart contract on windows run:
 The <network> parameter can be used to select a network for deployment. Possible values are:
  - "mainnet" - used for deployment to the main Ethereum network. Connects to a local node that is synced with the mainnet.
  - "ropsten" - used for deployment to the public test network. Connects to a local node that is synced with the Ropsten test network.
- - "private" - Can be used for testing in a private network. Connects to a node running at localhost:8545 with network id - 45
+ - "private" - Can be used for testing in a private network. Connects to a node running at localhost:8545 with network id - 45 (note: the network id can be changed from the truffle.js config file)
  - "development" - Can be used for development with Ganache. Connects to a node running at localhost:7545
  
 After deployment, the address of the contract will be displayed in the console:

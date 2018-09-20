@@ -27,7 +27,6 @@
     "solidity-coverage": "^0.5.11",
     "solhint": "^1.2.1",
     "truffle": "^4.1.14",
-    "web3": "^1.0.0-beta",
     "web3-utils": "^1.0.0-beta"
   },
   "dependencies": {}
