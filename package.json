@@ -12,8 +12,7 @@
     "test": "./scripts/test.sh",
     "lint": "./scripts/lint.sh",
     "coverage": "./scripts/coverage.sh",
-    "deploy-linux": "./scripts/deploy.sh",
-    "deploy-windows": ".\\scripts\\deploy.bat"
+    "deploy": "node ./scripts/deploy.js"
   },
   "repository": {
     "type": "git",
