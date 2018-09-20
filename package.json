@@ -1,0 +1,34 @@
+{
+  "name": "BeverageCashCoin",
+  "version": "1.0.0",
+  "description": "Beverage Cash Coin",
+  "files": [
+    "build",
+    "contracts",
+    "scripts",
+    "test"
+  ],
+  "scripts": {
+    "test": "./scripts/test.sh",
+    "lint": "./scripts/lint.sh",
+    "coverage": "./scripts/coverage.sh",
+    "deploy-linux": "./scripts/deploy.sh",
+    "deploy-windows": ".\\scripts\\deploy.bat"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/beveragecashcoin/BeverageCashCoin.git"
+  },
+  "author": "beveragecashcoin <bcct196@gmail.com>",
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "chai-bignumber": "^2.0.2",
+    "ganache-cli": "^6.1.8",
+    "solidity-coverage": "^0.5.11",
+    "solhint": "^1.2.1",
+    "truffle": "^4.1.14",
+    "web3": "^1.0.0-beta",
+    "web3-utils": "^1.0.0-beta"
+  },
+  "dependencies": {}
+}

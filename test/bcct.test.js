@@ -1,4 +1,4 @@
-var BeverageCoin = artifacts.require("./bcct.sol");
+var BeverageCoin = artifacts.require("BCCT");
 
 const BigNumber = web3.BigNumber;
 
@@ -278,61 +278,31 @@ contract("BCCT", async function([ownerAccount, targetAccount, anotherAccount]){
             });
         });
     });
-    
-    describe("addToTransferQueue", function(){
-        var amountToInsert = 1000;
-        
-        describe("when an address is added by the owner", function(){
-            it("should insert the address into the queryAddress array", async function(){
-                await this.instance.addToTransferQueue(targetAccount, amountToInsert, {from: ownerAccount});
-                (await this.instance.queryAddresses(0)).should.equal(targetAccount);
-            });
-            
-            it("should insert the amount of tokens into the queryAmounts array", async function(){
-                await this.instance.addToTransferQueue(targetAccount, amountToInsert, {from: ownerAccount});
-                (await this.instance.queryAmounts(0)).should.be.bignumber.equal(amountToInsert);
-            });
-        });
-        
-        describe("when the target address is short", function(){
-            it("should revert", async function(){
-                await assertRevert(this.instance.sendTransaction({from: ownerAccount, data: prepareCallData("0x1f15b69f", [shortAddress, shortAddressAmount])})); //66 bytes instead of 68
-            });
-        });
-        
-        describe("when an address is added not by the owner", function(){
-            it("should revert", async function(){
-                await assertRevert(this.instance.addToTransferQueue(targetAccount, amountToInsert, {from: anotherAccount}));
-            });
-        });
-    });
-    
+
     describe("transferQueue", function(){
-        var amountToInsert = 1000;
-        
-        beforeEach(async function(){
-                await this.instance.addToTransferQueue(targetAccount, amountToInsert, {from: ownerAccount});
-        });
+        var transferQueueAddresses = [targetAccount, anotherAccount];
+        var amountsToInsert = [100, 1000];
+        var totalAmountToInsert = amountsToInsert.reduce(function(a, b) { return a + b; }, 0);
         
         describe("when the function is called by the owner", function(){
             it("should decrease the amount of owner tokens", async function(){
                 let balanceBefore = await this.instance.balanceOf(ownerAccount);
-                await this.instance.transferQueue({from: ownerAccount});
+                await this.instance.transferQueue(transferQueueAddresses, amountsToInsert, {from: ownerAccount});
                 let balanceAfter = await this.instance.balanceOf(ownerAccount);
-                balanceBefore.sub(balanceAfter).should.to.be.bignumber.equal(amountToInsert);
+                balanceBefore.sub(balanceAfter).should.to.be.bignumber.equal(totalAmountToInsert);
             });
             
             it("should increase the amount of recevier tokens", async function(){
-                let balanceBefore = await this.instance.balanceOf(targetAccount);
-                await this.instance.transferQueue({from: ownerAccount});
-                let balanceAfter = await this.instance.balanceOf(targetAccount);
-                balanceAfter.sub(balanceBefore).should.to.be.bignumber.equal(amountToInsert);
+                let balanceBefore = await this.instance.balanceOf(transferQueueAddresses[0]);
+                await this.instance.transferQueue(transferQueueAddresses, amountsToInsert, {from: ownerAccount});
+                let balanceAfter = await this.instance.balanceOf(transferQueueAddresses[0]);
+                balanceAfter.sub(balanceBefore).should.to.be.bignumber.equal(amountsToInsert[0]);
             });
         });
         
         describe("when the function is called by not by the owner", function(){
             it("should revert", async function(){
-                await assertRevert(this.instance.transferQueue({from: anotherAccount}));
+                await assertRevert(this.instance.transferQueue(transferQueueAddresses, amountsToInsert, {from: anotherAccount}));
             });
         });
     });
