@@ -1,7 +1,9 @@
 # Beverage Cash Coin (BCCT) repository
 
 ## Dependencies
-Node.js is required to run any of the following commands. Node.js and npm can be downloaded here: https://nodejs.org/ 
+Node.js and Python 2.7 are required to run any of the following commands. 
+Node.js and npm can be downloaded here: https://nodejs.org/ 
+Pyhton can be downloaded here: https://python.org/
 
 To install dependencies for development and deployment, from the project directory run:
 ```
